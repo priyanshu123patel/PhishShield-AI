@@ -90,6 +90,29 @@
 			color: var(--accent-dark);
 		}
 
+		.top-nav {
+			margin-top: 15px;
+		}
+
+		.nav-link {
+			display: inline-flex;
+			align-items: center;
+			padding: 8px 12px;
+			border-radius: 999px;
+			border: 1px solid rgba(15, 30, 34, 0.18);
+			background: rgba(255, 255, 255, 0.7);
+			color: var(--accent-dark);
+			font-size: 13px;
+			font-weight: 700;
+			text-decoration: none;
+			transition: transform 0.18s ease, background 0.18s ease;
+		}
+
+		.nav-link:hover {
+			transform: translateY(-1px);
+			background: rgba(17, 117, 84, 0.12);
+		}
+
 		.header {
 			padding: 34px 34px 16px;
 		}
@@ -390,25 +413,25 @@
 				</div>
 			</div>
 		</section>
-
+		
 		<section class="content">
 			<form action="/predict" method="post" autocomplete="off">
 				<div class="input-wrap">
 					<input type="text" id="urlInput" name="url" placeholder="Try: secure-login-update.example.com"
-						value="{{ entered_url or '' }}" autocomplete="off" required>
+					value="{{ entered_url or '' }}" autocomplete="off" required>
 				</div>
 				<button type="submit">Check Website</button>
 			</form>
-
+			
 			<div class="chips">
 				<button class="chip" type="button"
-					data-url="http://secure-login-update.example.com.verify-account.info/login">Sample URL 1</button>
+				data-url="http://secure-login-update.example.com.verify-account.info/login">Sample URL 1</button>
 				<button class="chip" type="button" data-url="http://google.com.security-check.example.net/signin">Sample
 					URL 2</button>
-				<button class="chip" type="button" data-url="https://www.wikipedia.org">Sample URL 3</button>
-			</div>
-
-			<div
+					<button class="chip" type="button" data-url="https://www.wikipedia.org">Sample URL 3</button>
+				</div>
+				
+				<div
 				class="result {% if prediction_text == 'Legitimate Website' %}legit{% elif prediction_text == 'Phishing Website' %}phishing{% endif %}">
 				<p>Your web URL status is : {{ prediction_text or 'Prediction result will appear here.' }}</p>
 			</div>
@@ -416,14 +439,17 @@
 			{% if error_text %}
 			<p class="error">{{ error_text }}</p>
 			{% endif %}
-
+			
 			<div class="caution">
 				Prediction is an AI estimate and may not be 100% accurate. Always verify suspicious websites using
 				trusted security tools before taking action.
 			</div>
+			<nav class="top-nav">
+				<a class="nav-link" href="{{ url_for('developer') }}">About Developer</a>
+			</nav>
 		</section>
 	</main>
-
+	
 	<script>
 		const urlInput = document.getElementById("urlInput");
 		const chips = document.querySelectorAll(".chip[data-url]");

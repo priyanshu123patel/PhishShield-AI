@@ -181,6 +181,11 @@ def home():
         model_accuracy=MODEL_ACCURACY,
     )
 
+
+@app.route('/developer')
+def developer():
+    return render_template('developer.html')
+
 @app.route('/predict', methods=['POST'])
 def predict():
     raw_url = request.form.get("url", "")
