@@ -8,12 +8,30 @@ import urllib.request
 
 app = Flask(__name__)
 
-model = pickle.load(open("phishing_model.pkl", "rb"))
+MODELS = {
+    "rf": {
+        "label": "Random Forest",
+        "model": pickle.load(open("phishing_model_rf.pkl", "rb")),
+    },
+    "dt": {
+        "label": "Decision Tree",
+        "model": pickle.load(open("phishing_model_dt.pkl", "rb")),
+    },
+}
+
+DEFAULT_MODEL_KEY = "rf"
 
 
-def _get_model_accuracy_text(csv_path="phishing.csv"):
+def _resolve_model_key(model_key):
+    return model_key if model_key in MODELS else DEFAULT_MODEL_KEY
+
+
+def _get_model_accuracy_text(model_key, csv_path="phishing.csv"):
     """Return dataset accuracy text for display, if dataset is available."""
     try:
+        resolved_key = _resolve_model_key(model_key)
+        selected_model = MODELS[resolved_key]["model"]
+
         X = []
         y = []
         with open(csv_path, "r", encoding="utf-8") as csv_file:
@@ -26,13 +44,16 @@ def _get_model_accuracy_text(csv_path="phishing.csv"):
         if not X:
             return "N/A"
 
-        accuracy = model.score(X, y) * 100.0
+        accuracy = selected_model.score(X, y) * 100.0
         return f"{accuracy:.2f}%"
     except Exception:
         return "N/A"
 
 
-MODEL_ACCURACY = _get_model_accuracy_text()
+MODEL_ACCURACY = {
+    "rf": _get_model_accuracy_text("rf"),
+    "dt": _get_model_accuracy_text("dt"),
+}
 
 
 def _safe_open_url(url):
@@ -173,12 +194,16 @@ def extract_features_from_url(raw_url):
 def home():
     prediction_text = request.args.get("prediction", "")
     error_text = request.args.get("error", "")
+    selected_model = _resolve_model_key(request.args.get("model", DEFAULT_MODEL_KEY))
+
     return render_template(
         'index.html',
         prediction_text=prediction_text,
         entered_url="",
         error_text=error_text,
-        model_accuracy=MODEL_ACCURACY,
+        selected_model=selected_model,
+        selected_model_label=MODELS[selected_model]["label"],
+        model_accuracy=MODEL_ACCURACY.get(selected_model, "N/A"),
     )
 
 
@@ -189,6 +214,8 @@ def developer():
 @app.route('/predict', methods=['POST'])
 def predict():
     raw_url = request.form.get("url", "")
+    selected_model = _resolve_model_key(request.form.get("model_type", DEFAULT_MODEL_KEY))
+    model = MODELS[selected_model]["model"]
 
     try:
         features, _ = extract_features_from_url(raw_url)
@@ -199,9 +226,9 @@ def predict():
         else:
             result = "Phishing Website"
 
-        return redirect(url_for("home", prediction=result))
+        return redirect(url_for("home", prediction=result, model=selected_model))
     except Exception as exc:
-        return redirect(url_for("home", error=f"Error: {exc}"))
+        return redirect(url_for("home", error=f"Error: {exc}", model=selected_model))
 
 if __name__ == "__main__":
     app.run(debug=True)

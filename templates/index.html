@@ -26,6 +26,18 @@
 			--ring: rgba(17, 117, 84, 0.22);
 		}
 
+		body.theme-dt {
+			--bg-top: #edeff8;
+			--bg-bottom: #dfe5f6;
+			--card: rgba(255, 255, 255, 0.8);
+			--text: #131b2f;
+			--muted: #5d6885;
+			--accent: #2a4db9;
+			--accent-dark: #1f3a8a;
+			--shadow: 0 20px 40px rgba(21, 33, 79, 0.16);
+			--ring: rgba(42, 77, 185, 0.22);
+		}
+
 		* {
 			box-sizing: border-box;
 		}
@@ -183,6 +195,47 @@
 			margin-top: 10px;
 		}
 
+		.model-switch {
+			grid-column: 1 / -1;
+			display: inline-grid;
+			grid-template-columns: 1fr 1fr;
+			gap: 6px;
+			padding: 6px;
+			border-radius: 14px;
+			background: rgba(255, 255, 255, 0.82);
+			border: 1px solid rgba(18, 42, 49, 0.18);
+			width: min(460px, 100%);
+		}
+
+		.model-switch input[type="radio"] {
+			position: absolute;
+			opacity: 0;
+			pointer-events: none;
+		}
+
+		.model-option {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			padding: 10px 12px;
+			border-radius: 10px;
+			font-size: 14px;
+			font-weight: 700;
+			color: var(--muted);
+			cursor: pointer;
+			transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+		}
+
+		.model-option:hover {
+			transform: translateY(-1px);
+		}
+
+		.model-switch input[type="radio"]:checked + .model-option {
+			background: linear-gradient(140deg, var(--accent), var(--accent-dark));
+			color: #ffffff;
+			box-shadow: 0 8px 14px rgba(12, 37, 48, 0.2);
+		}
+
 		.input-wrap {
 			position: relative;
 		}
@@ -215,16 +268,16 @@
 			font-size: 16px;
 			font-weight: 700;
 			color: #fff;
-			background: linear-gradient(140deg, #159b70, #0d593f);
+			background: linear-gradient(140deg, var(--accent), var(--accent-dark));
 			cursor: pointer;
-			box-shadow: 0 12px 20px rgba(13, 89, 63, 0.25);
+			box-shadow: 0 12px 20px rgba(12, 37, 48, 0.25);
 			transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
 		}
 
 		button:hover {
 			transform: translateY(-2px);
 			filter: saturate(1.08);
-			box-shadow: 0 14px 22px rgba(13, 89, 63, 0.3);
+			box-shadow: 0 14px 22px rgba(12, 37, 48, 0.3);
 		}
 
 		button:active {
@@ -255,7 +308,7 @@
 
 		.chip:hover {
 			background: #f7fffc;
-			color: #117554;
+			color: var(--accent);
 		}
 
 		.result {
@@ -408,6 +461,10 @@
 			</p>
 			<div class="stats-row">
 				<div class="stat-pill">
+					<span class="label">Selected Model</span>
+					<span class="value">{{ selected_model_label }}</span>
+				</div>
+				<div class="stat-pill">
 					<span class="label">Model Accuracy</span>
 					<span class="value">{{ model_accuracy }}</span>
 				</div>
@@ -416,6 +473,16 @@
 		
 		<section class="content">
 			<form action="/predict" method="post" autocomplete="off">
+				<div class="model-switch" role="radiogroup" aria-label="Select model">
+					<label>
+						<input type="radio" name="model_type" value="rf" {% if selected_model != 'dt' %}checked{% endif %}>
+						<span class="model-option">Random Forest</span>
+					</label>
+					<label>
+						<input type="radio" name="model_type" value="dt" {% if selected_model == 'dt' %}checked{% endif %}>
+						<span class="model-option">Decision Tree</span>
+					</label>
+				</div>
 				<div class="input-wrap">
 					<input type="text" id="urlInput" name="url" placeholder="Try: secure-login-update.example.com"
 					value="{{ entered_url or '' }}" autocomplete="off" required>
@@ -451,8 +518,24 @@
 	</main>
 	
 	<script>
+		const body = document.body;
 		const urlInput = document.getElementById("urlInput");
 		const chips = document.querySelectorAll(".chip[data-url]");
+		const modelRadios = document.querySelectorAll('input[name="model_type"]');
+
+		const applyThemeFromSelection = () => {
+			const selectedModel = document.querySelector('input[name="model_type"]:checked')?.value;
+			if (selectedModel === "dt") {
+				body.classList.add("theme-dt");
+			} else {
+				body.classList.remove("theme-dt");
+			}
+		};
+
+		applyThemeFromSelection();
+		modelRadios.forEach((radio) => {
+			radio.addEventListener("change", applyThemeFromSelection);
+		});
 
 		chips.forEach((chip) => {
 			chip.addEventListener("click", () => {

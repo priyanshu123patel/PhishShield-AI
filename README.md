@@ -1,82 +1,137 @@
 # PhishShield AI
 
-PhishShield AI is a Flask-based web app that predicts whether a URL is likely **Legitimate** or **Phishing** using a pre-trained machine learning model.
+PhishShield AI is a machine-learning powered web app that helps users quickly check whether a website URL appears legitimate or phishing.
 
-## Features
+Built with Flask and scikit-learn, the app extracts 30 URL/behavior features in real time, runs inference with multiple trained models, and returns an instant security prediction through a modern, responsive interface.
 
-- URL phishing detection from a simple web interface
-- Automatic feature extraction from the submitted URL
-- Model prediction output:
-  - Legitimate Website
-  - Phishing Website
-- Displays model accuracy calculated from `phishing.csv` (when available)
-- Includes sample URLs for quick testing
+## Why This Project Stands Out
 
-## Project Structure
+- Dual-model inference: switch between Random Forest and Decision Tree predictions.
+- Real-time feature engineering: URL is normalized, parsed, and transformed into a phishing-risk feature vector.
+- Live model score display: accuracy is evaluated from dataset labels when `phishing.csv` is available.
+- UX-first design: polished, mobile-friendly frontend with quick sample URL testing chips.
+- Practical security focus: fast feedback for awareness, demos, and educational use.
 
-- `app.py` - Flask application and URL feature extraction logic
-- `templates/index.html` - Frontend UI
-- `static/` - Static assets (logo, etc.)
-- `phishing_model.pkl` - Trained phishing detection model
-- `phishing.csv` - Dataset used for local accuracy display
-- `phishing_website_detection_final_project.ipynb` - Notebook used during model development/training
+## Live App Flow
 
-## Requirements
+1. User submits a URL from the web form.
+2. Backend validates and normalizes the input (`http://` is auto-added when missing).
+3. System computes 30 phishing indicators (IP usage, URL length, redirects, subdomain depth, iframe behavior, and more).
+4. Selected model predicts one of two outcomes:
+   - `Legitimate Website`
+   - `Phishing Website`
+5. UI displays the prediction and currently selected model accuracy.
 
-- Python 3.8+
-- pip
+## Tech Stack
 
-Python packages:
-
+- Python
 - Flask
 - scikit-learn
+- NumPy
+- HTML/CSS/JavaScript
 
-You can install dependencies with:
+## Repository Structure
 
-```bash
-pip install flask scikit-learn
+```text
+PhishShield AI/
+|- app.py
+|- phishing.csv
+|- phishing_model_rf.pkl
+|- phishing_model_dt.pkl
+|- phishing_website_detection_final_project.ipynb
+|- requirements.txt
+|- static/
+|  |- logo.svg
+|- templates/
+|  |- index.html
+|  |- developer.html
 ```
 
-## Run Locally
+## Getting Started
 
-1. Open a terminal in the project folder.
-2. Start the app:
+### 1) Clone and enter project
+
+```bash
+git clone <your-repository-url>
+cd "PhishShield AI"
+```
+
+### 2) Create and activate virtual environment (recommended)
+
+Windows PowerShell:
+
+```bash
+python -m venv .venv
+.venv\Scripts\Activate.ps1
+```
+
+macOS/Linux:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
+### 3) Install dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### 4) Run the application
 
 ```bash
 python app.py
 ```
 
-3. Open your browser and visit:
+Open your browser at:
 
 ```text
 http://127.0.0.1:5000/
 ```
 
-## How It Works
+## Model Assets
 
-1. You submit a URL from the homepage.
-2. The app normalizes and parses the URL.
-3. It extracts 30 phishing-related features (such as URL length, use of IP, HTTPS, special symbols, and page behavior hints).
-4. The feature vector is passed to the trained model loaded from `phishing_model.pkl`.
-5. The app returns a prediction on the UI.
+The app expects both trained model files in the project root:
 
-## Important Notes
+- `phishing_model_rf.pkl`
+- `phishing_model_dt.pkl`
 
-- This tool provides an ML-based estimate, not a guaranteed verdict.
-- Some features depend on short HTML fetches and may be limited by connectivity/timeouts.
-- Keep `phishing_model.pkl` and `phishing.csv` in the project root so the app can load them correctly.
+If either file is missing, model loading will fail at startup.
+
+## Key Features Engineered in Backend
+
+The prediction vector includes 30 attributes, such as:
+
+- IP address usage in hostname
+- long/short URL heuristics
+- `@` symbol and redirect pattern checks
+- prefix/suffix (`-`) analysis in domain
+- subdomain depth scoring
+- HTTPS and non-standard port checks
+- suspicious page behaviors from fetched HTML (iframe, popup, right-click suppression, mouseover tricks)
+
+This combination provides a practical heuristic + ML approach for phishing detection.
 
 ## Troubleshooting
 
-- If you see import errors, reinstall dependencies:
+- `ModuleNotFoundError`: run `pip install -r requirements.txt` again.
+- `N/A` accuracy badge: verify `phishing.csv` exists and contains feature columns plus `class`.
+- URL fetch-based checks not triggering: confirm internet connectivity (HTML fetch timeout is intentionally short).
 
-```bash
-pip install --upgrade flask scikit-learn
-```
+## Security Note
 
-- If model loading fails, ensure `phishing_model.pkl` exists in the root folder.
-- If accuracy shows `N/A`, ensure `phishing.csv` exists and has the expected columns.
+PhishShield AI is an assistive detector, not a guaranteed verdict engine. Treat outputs as risk signals and always validate suspicious URLs with trusted security tools.
 
-## Disclaimer
+## Future Improvements
 
-Use this project for educational and defensive security purposes. Always verify suspicious links with trusted security tools before visiting or sharing them.
+- Probability/confidence score display
+- Batch URL scanning mode
+- Model performance dashboard
+- API endpoint for external integrations
+
+## Author
+
+Patel Priyanshu
+
+Built with a focus on practical cybersecurity and user-friendly ML applications.
