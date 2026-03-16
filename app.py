@@ -204,6 +204,8 @@ def home():
         selected_model=selected_model,
         selected_model_label=MODELS[selected_model]["label"],
         model_accuracy=MODEL_ACCURACY.get(selected_model, "N/A"),
+        model_accuracy_rf=MODEL_ACCURACY.get("rf", "N/A"),
+        model_accuracy_dt=MODEL_ACCURACY.get("dt", "N/A"),
     )
 
 
